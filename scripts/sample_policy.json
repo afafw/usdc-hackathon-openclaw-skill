@@ -1,10 +1,17 @@
 {
-  "max_single_usdc": 500,
-  "daily_limit_usdc": 1200,
-  "category_limits_usdc": {
-    "marketing": 400,
-    "ops": 600
+  "block_new_skills": false,
+  "mainnet_allowed": true,
+  "mainnet_max_usdc": 5,
+  "max_single_usdc": 100,
+  "allowlist": {
+    "skill_authors": ["trusted_dev"],
+    "skill_sources": ["https://clawhub.ai"],
+    "addresses": ["0xabc...def"]
   },
-  "known_recipients": ["AcmeCloud", "FastShip", "LunaAds"],
-  "deny_recipients": ["ShadyVendor"]
+  "denylist": {
+    "skill_authors": ["bad_actor"],
+    "skill_sources": ["https://malicious.site"],
+    "addresses": ["0xdead...beef"]
+  },
+  "risky_permissions": ["exec", "fs:write", "net:all"]
 }

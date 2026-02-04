@@ -1,25 +1,26 @@
 # usdc-hackathon-openclaw-skill
 
-SpendGuard is a minimal OpenClaw skill-track MVP for USDC policy gating. It evaluates a batch of transactions against a simple policy file and produces approvals with reasons.
+**SafeGuard** is a minimal OpenClaw skill-set MVP for security and spend gating. It reviews **new skills** and **USDC payments**, enforcing allowlists, deny lists, and mainnet thresholds.
 
 ## Quickstart
 ```bash
-python3 scripts/spendguard.py \
+python3 scripts/safeguard.py \
   --policy scripts/sample_policy.json \
-  --transactions scripts/sample_transactions.csv \
+  --requests scripts/sample_requests.json \
   --out report.json
 ```
 
 ## Files
 - `SKILL.md` — skill specification and behavior
-- `scripts/spendguard.py` — evaluator
+- `scripts/safeguard.py` — evaluator
 - `scripts/sample_policy.json` — example policy
-- `scripts/sample_transactions.csv` — example transactions
+- `scripts/sample_requests.json` — example skill + payment requests
 
 ## Output
-- `report.json` — structured summary and per-transaction status
+- `report.json` — structured summary and per-request status
 
 ## Extend
-- Swap CSV for live expense ingestion
+- Hook into real skill install/enable flows
 - Add on-chain execution + approvals
-- Wire to notifications / dashboards
+- Emit audit logs and alerts
+- Replace sample JSON with live event ingestion
