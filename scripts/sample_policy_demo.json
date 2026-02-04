@@ -1,0 +1,21 @@
+{
+  "block_new_skills": false,
+  "mainnet_allowed": false,
+  "mainnet_max_usdc": 0,
+  "max_single_usdc": 100,
+  "allowlist": {
+    "skill_authors": [],
+    "skill_sources": [],
+    "addresses": []
+  },
+  "denylist": {
+    "skill_authors": [],
+    "skill_sources": [],
+    "addresses": []
+  },
+  "risky_permissions": [
+    "exec",
+    "fs:write",
+    "net:all"
+  ]
+}

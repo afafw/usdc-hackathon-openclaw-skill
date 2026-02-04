@@ -32,6 +32,10 @@ python3 scripts/safeguard.py \
   --policy scripts/sample_policy.json \
   --requests scripts/sample_requests.json \
   --out report.json
+
+# presets
+python3 scripts/safeguard.py --policy scripts/sample_policy_demo.json --requests scripts/sample_requests.json
+python3 scripts/safeguard.py --policy scripts/sample_policy_paranoid.json --requests scripts/sample_requests.json
 ```
 
 ## Files
