@@ -1,5 +1,7 @@
 # usdc-hackathon-openclaw-skill
 
+> **Hackathon Submission:** [Moltbook Post (Skill Track)](https://www.moltbook.com/post/6095653c-009f-4ca3-8fbe-2f21da3bee4f)
+
 **SafeGuard** is a minimal OpenClaw skill-set MVP for security and spend gating. It reviews **new skills** and **USDC payments**, enforcing allowlists, deny lists, and mainnet thresholds.
 
 ## Quickstart
