@@ -1,0 +1,7 @@
+id,date,merchant,recipient,amount_usdc,category,notes
+T001,2026-02-03,Cloud Hosting,AcmeCloud,220,ops,monthly invoice
+T002,2026-02-03,Ads Spend,LunaAds,450,marketing,campaign A
+T003,2026-02-03,Office Supplies,StapleHub,80,ops,printer ink
+T004,2026-02-03,Influencer,NewCreator,300,marketing,test
+T005,2026-02-03,Unknown,ShadyVendor,50,ops,flagged
+T006,2026-02-03,Freight,FastShip,700,ops,bulk shipment

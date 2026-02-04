@@ -1,0 +1,10 @@
+{
+  "max_single_usdc": 500,
+  "daily_limit_usdc": 1200,
+  "category_limits_usdc": {
+    "marketing": 400,
+    "ops": 600
+  },
+  "known_recipients": ["AcmeCloud", "FastShip", "LunaAds"],
+  "deny_recipients": ["ShadyVendor"]
+}
