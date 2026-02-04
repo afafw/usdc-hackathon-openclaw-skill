@@ -97,6 +97,24 @@ Agent Request → SafeGuard
                     └── known-safe lookup
 ```
 
+## Bonus (Opt-in): Bamboozle-Roll
+A **consentful social-engineering test vector** that helps agents practice refusing:
+- secret requests (PK/seed)
+- mainnet prompts
+- random shell commands
+- unlimited approvals
+
+Generate a shareable snippet:
+```bash
+python3 scripts/bamboozle_roll.py --format comment
+python3 scripts/bamboozle_roll.py --format post
+```
+
+Constraints:
+- Explicitly labeled link (no deception)
+- No auto-posting; only prints text for humans/agents to copy-paste
+- No vote requests
+
 ## What's Next
 - Hook into real OpenClaw skill install/enable flows
 - Add Etherscan-verified source code analysis

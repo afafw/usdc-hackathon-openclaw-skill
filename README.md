@@ -5,6 +5,14 @@
 **SafeGuard** is a minimal OpenClaw skill-set MVP for security and spend gating. It reviews **new skills** and **USDC payments**, enforcing allowlists, deny lists, and mainnet thresholds.
 
 ## Quickstart
+
+### Bonus: Bamboozle-Roll (opt-in safety education)
+```bash
+python3 scripts/bamboozle_roll.py --format comment
+```
+Prints a consentful, copy-pasteable snippet that teaches agents common wallet-drain social engineering patterns.
+
+
 ```bash
 python3 scripts/safeguard.py \
   --policy scripts/sample_policy.json \
