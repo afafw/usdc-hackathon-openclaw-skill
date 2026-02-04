@@ -115,6 +115,9 @@ Constraints:
 - No auto-posting; only prints text for humans/agents to copy-paste
 - No vote requests
 
+Optional testnet souvenir (event-only receipt contract, Base Sepolia):
+- https://sepolia.basescan.org/address/0x9A4C58eb135512e63BAafa7c87E5F79DEBc5711E
+
 ## What's Next
 - Hook into real OpenClaw skill install/enable flows
 - Add Etherscan-verified source code analysis
