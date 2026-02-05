@@ -47,4 +47,14 @@ node scripts/pay.js --to 0x... --amount 1
 
 ## Notes
 - Destination gas is not required (Circle forwards the mint).
-- Source chain still needs gas unless you pair this with an ERC-4337 wallet + Circle Paymaster (not required for the forwarding demo).
+- Source chain **can** be gasless if you pair this with **Circle Paymaster** (ERC-4337): see `node scripts/usdc-gas.js`.
+
+### Pay gas in USDC (Circle Paymaster)
+Demo on **Base Sepolia** (Paymaster v0.8 + EIP-7702 smart account):
+```bash
+# Set env vars (or put them in a .env file)
+export OWNER_PRIVATE_KEY=0x...
+export RECIPIENT_ADDRESS=0x...
+
+node scripts/usdc-gas.js --amount 0.01
+```
