@@ -11,6 +11,14 @@ To make evaluation fast, run VoteKit. It executes the policy gate + bytecode sca
 python3 scripts/votekit.py
 ```
 
+## New module: USDC Intent Router (1-tx cross-chain)
+A small companion skill that wraps **Circle CCTP Forwarding Service** so an agent can:
+- burn+forward in **one Base Sepolia tx** (`depositForBurnWithHook`)
+- poll Iris and get the **forwardTxHash** (destination mint tx)
+
+Code:
+- `skills/usdc-intent-router/` (JS + viem)
+
 ## Quickstart
 
 ### Bonus: Bamboozle-Roll (opt-in safety education)

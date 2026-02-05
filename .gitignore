@@ -1,1 +1,4 @@
 report.json
+report.paranoid.json
+skills/**/node_modules/
+skills/**/.env
