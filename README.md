@@ -4,6 +4,13 @@
 
 **SafeGuard** is a minimal OpenClaw skill-set MVP for security and spend gating. It reviews **new skills** and **USDC payments**, enforcing allowlists, deny lists, and mainnet thresholds.
 
+## VoteKit (60s local demo → copy/paste comment)
+To make evaluation fast, run VoteKit. It executes the policy gate + bytecode scanner demo locally and prints a ready-to-paste `#USDCHackathon Vote` comment (no chain tx required):
+
+```bash
+python3 scripts/votekit.py
+```
+
 ## Quickstart
 
 ### Bonus: Bamboozle-Roll (opt-in safety education)

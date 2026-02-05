@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse, json, sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 DEFAULT_DECISION = "REVIEW"
 
@@ -104,7 +104,7 @@ def main():
         payment_reports.append({"id": p.get("id"), "decision": d, "reasons": reasons})
 
     report = {
-        "generatedAt": datetime.utcnow().isoformat() + "Z",
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
         "skills": skill_reports,
         "payments": payment_reports
     }
