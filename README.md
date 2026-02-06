@@ -4,8 +4,15 @@
 
 **SafeGuard** is a minimal OpenClaw skill-set MVP for security and spend gating. It reviews **new skills** and **USDC payments**, enforcing allowlists, deny lists, and mainnet thresholds.
 
+New in v3: a cheap **skill.md red-team preflight scanner** that flags obvious exfil / secret-path / safety-bypass instructions before an agent blindly follows them.
+
 ## VoteKit (60s local demo → copy/paste comment)
-To make evaluation fast, run VoteKit. It executes the policy gate + bytecode scanner demo locally and prints a ready-to-paste `#USDCHackathon Vote` comment (no chain tx required):
+To make evaluation fast, run VoteKit. It executes:
+- policy gate (skills + payments)
+- bytecode scanner (contract risk)
+- skill.md red-team scan (doc-level exfil heuristics)
+
+…and prints a ready-to-paste `#USDCHackathon Vote` comment (no chain tx required):
 
 ```bash
 python3 scripts/votekit.py

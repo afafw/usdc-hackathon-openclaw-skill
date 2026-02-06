@@ -3,7 +3,7 @@ name: safeguard
 description: Security gatekeeper for OpenClaw agents — reviews skills, USDC payments, and smart contracts before interaction.
 ---
 
-# SafeGuard v2 (USDC Skill Track)
+# SafeGuard v3 (USDC Skill Track)
 
 A security-first OpenClaw skill that protects agents from malicious skills, dangerous contracts, and risky USDC transfers. Combines policy-based gating with on-chain bytecode analysis.
 
@@ -14,7 +14,7 @@ A security-first OpenClaw skill that protects agents from malicious skills, dang
 - Reviews **skill installs** and **USDC payment requests**
 - Flags each request as **APPROVE / REVIEW / DENY**
 
-### 2. Contract Bytecode Scanner (v2 — NEW)
+### 2. Contract Bytecode Scanner (v2)
 - Fetches on-chain bytecode via RPC or accepts raw bytecode
 - Scans for **dangerous opcodes**: selfdestruct, delegatecall, callcode, tx.origin
 - Detects **known function selectors**: approve, transferFrom, burn, renounceOwnership
@@ -22,6 +22,18 @@ A security-first OpenClaw skill that protects agents from malicious skills, dang
 - Outputs a **risk score** (0-100) and **risk level** (APPROVE/REVIEW/DENY)
 
 Inspired by Sentinel AI Auditor and USDC Security Scanner from the USDC Hackathon.
+
+### 3. skill.md / README Red-Team Scanner (v3 — NEW)
+- Static preflight for obvious exfil / secret-path / safety-bypass instructions in skill docs
+- Flags common secret paths (`~/.env`, `~/.ssh/id_rsa`, `~/.openclaw/openclaw.json`) and suspicious endpoints (e.g. webhook.site)
+- Output: **APPROVE / REVIEW / DENY** + risk score + findings
+
+Usage:
+```bash
+python3 scripts/skillmd_scanner.py --path redteam/malicious_skill.md
+```
+
+⚠️ This is heuristic/static scanning — it reduces risk but does not replace sandboxing.
 
 ## Usage
 

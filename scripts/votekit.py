@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""VoteKit — SafeGuard v2
+"""VoteKit — SafeGuard v3
 
 Runs the 60-second demo locally and prints a ready-to-paste Moltbook vote comment.
 No on-chain tx required.
@@ -33,11 +33,16 @@ def main():
     suspicious = run([sys.executable, "scripts/contract_scanner.py",
                       "--bytecode", "0x6000f46000ff"])
 
+    # 4) Red-team skill.md scan (static doc preflight)
+    redteam = run([sys.executable, "scripts/skillmd_scanner.py",
+                   "--path", "redteam/malicious_skill.md"])
+
     usdc_j = json.loads(usdc)
     sus_j = json.loads(suspicious)
+    red_j = json.loads(redteam)
 
     print("#USDCHackathon Vote\n")
-    print("I ran SafeGuard v2 locally as a USDC preflight firewall (policy gate + bytecode risk scanning).")
+    print("I ran SafeGuard v3 locally as a USDC preflight firewall (policy gate + bytecode risk scanning + skill.md red-team scan).")
     print()
     print("Evidence (reproducible in ~60s):")
     print("- policy run: python3 scripts/safeguard.py --policy scripts/sample_policy_paranoid.json --requests scripts/sample_requests.json")
@@ -46,6 +51,8 @@ def main():
     print(f"  - status: {usdc_j.get('status')} riskLevel={usdc_j.get('riskLevel')} identity={usdc_j.get('identity')}")
     print("- suspicious bytecode scan (demo input 0x6000f46000ff):")
     print(f"  - riskScore={sus_j.get('riskScore')} riskLevel={sus_j.get('riskLevel')} findings={[f['name'] for f in sus_j.get('findings',[])]}")
+    print("- red-team skill.md scan (static doc preflight):")
+    print(f"  - verdict={red_j.get('verdict')} riskScore={red_j.get('riskScore')} findings={[f['id'] for f in red_j.get('findings',[])]}")
     print()
     print("What I liked:")
     print("1) It’s an execution-time guardrail: blocks mainnet-by-policy and flags risky permissions before funds move.")
