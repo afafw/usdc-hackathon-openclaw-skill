@@ -1,138 +1,83 @@
 ---
 name: safeguard
-description: Security gatekeeper for OpenClaw agents — reviews skills, USDC payments, and smart contracts before interaction.
+version: 2.0.0
+description: Scan any OpenClaw skill for security red flags before installation. Block malicious skills, track version drift, attest results on-chain.
+homepage: https://github.com/afafw/usdc-hackathon-openclaw-skill
+metadata:
+  openclaw:
+    requires:
+      bins: ["python3"]
+    category: security
 ---
 
-# SafeGuard v3 (USDC Skill Track)
+# SafeGuard — Skill Supply-Chain Security for OpenClaw
 
-A security-first OpenClaw skill that protects agents from malicious skills, dangerous contracts, and risky USDC transfers. Combines policy-based gating with on-chain bytecode analysis.
+**Pay only after safe install.**
 
-## What it does
+SafeGuard scans OpenClaw skills (SKILL.md + scripts) for security red flags *before* your agent installs them. Think `npm audit` but for agent skills.
 
-### 1. Skill & Payment Gating (v1)
-- Reads a **policy JSON** (allowlists, denylists, risky permissions, mainnet thresholds)
-- Reviews **skill installs** and **USDC payment requests**
-- Flags each request as **APPROVE / REVIEW / DENY**
+## What it catches
 
-### 2. Contract Bytecode Scanner (v2)
-- Fetches on-chain bytecode via RPC or accepts raw bytecode
-- Scans for **dangerous opcodes**: selfdestruct, delegatecall, callcode, tx.origin
-- Detects **known function selectors**: approve, transferFrom, burn, renounceOwnership
-- Matches against **known safe contracts** (USDC, Uniswap Router)
-- Outputs a **risk score** (0-100) and **risk level** (APPROVE/REVIEW/DENY)
-
-Inspired by Sentinel AI Auditor and USDC Security Scanner from the USDC Hackathon.
-
-### 3. skill.md / README Red-Team Scanner (v3 — NEW)
-- Static preflight for obvious exfil / secret-path / safety-bypass instructions in skill docs
-- Flags common secret paths (`~/.env`, `~/.ssh/id_rsa`, `~/.openclaw/openclaw.json`) and suspicious endpoints (e.g. webhook.site)
-- Output: **APPROVE / REVIEW / DENY** + risk score + findings
-
-Usage:
-```bash
-python3 scripts/skillmd_scanner.py --path redteam/malicious_skill.md
-```
-
-⚠️ This is heuristic/static scanning — it reduces risk but does not replace sandboxing.
+- 🚩 **Pipe-to-shell** (`curl ... | bash`, `wget ... | sh`)
+- 🚩 **Credential access** (reads `~/.config/*`, `$HOME/.ssh/*`, env vars with KEY/TOKEN/SECRET)
+- 🚩 **Data exfiltration** (outbound fetch/curl to unknown domains)
+- 🚩 **Version drift** (hash changed between versions = unexpected mutation)
+- 🚩 **Privilege escalation** (`sudo`, `chmod 777`, writing to system paths)
 
 ## Usage
 
-### Policy Gate
 ```bash
-python3 scripts/safeguard.py \
-  --policy scripts/sample_policy.json \
-  --requests scripts/sample_requests.json \
-  --out report.json
+# Scan a skill directory
+python3 scan.py ./path/to/skill/
+
+# Scan with on-chain attestation (Base Sepolia)
+python3 scan.py ./path/to/skill/ --attest
+
+# Output: structured JSON report
+python3 scan.py ./path/to/skill/ --json
 ```
 
-### Contract Scanner
+## Output Format
+
+```
+╔══════════════════════════════════════════╗
+║  SafeGuard Scan Report                   ║
+╠══════════════════════════════════════════╣
+║  Skill: weather-lookup v1.1.0            ║
+║  Hash:  0xd4c1...8f3a                    ║
+║                                          ║
+║  Verdict: 🚨 BLOCK                       ║
+║                                          ║
+║  🚩 Line 12: curl ... | bash             ║
+║  🚩 Line 18: reads ~/.config/creds.json  ║
+║  🚩 Line 23: fetch to evil.example.com   ║
+║  🚩 Hash drift: 0x9a3f → 0xd4c1          ║
+╚══════════════════════════════════════════╝
+```
+
+## Install
+
+Copy this directory to your OpenClaw skills folder:
 ```bash
-# Scan by bytecode (fetched via cast/curl)
-BYTECODE=$(cast code 0xCONTRACT --rpc-url https://sepolia.base.org)
-python3 scripts/contract_scanner.py --bytecode "$BYTECODE"
-
-# Scan known safe address (instant lookup)
-python3 scripts/contract_scanner.py --address 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+cp -r safeguard/ ~/.openclaw/skills/safeguard/
 ```
 
-### Example Output (Contract Scanner)
-```json
-{
-  "bytecodeSize": 9453,
-  "riskScore": 20,
-  "riskLevel": "REVIEW",
-  "findings": [
-    {
-      "name": "delegatecall",
-      "severity": "HIGH",
-      "description": "Uses delegatecall — can execute arbitrary code in context",
-      "occurrences": 1
-    }
-  ],
-  "knownSelectors": [
-    {"name": "transfer(address,uint256)", "risk": "LOW"},
-    {"name": "transferOwnership(address)", "risk": "HIGH"}
-  ]
-}
-```
-
-## Decision Rules
-
-### Skills
-- **DENY**: author/source on denylist
-- **REVIEW**: not on allowlist, or risky permissions (filesystem, network, exec)
-
-### Payments
-- **DENY**: recipient on denylist, or mainnet disabled
-- **REVIEW**: recipient not on allowlist, exceeds single-tx or mainnet threshold
-
-### Contracts
-- **APPROVE**: known safe (USDC, Uniswap) — instant
-- **DENY**: selfdestruct detected, risk score ≥ 60
-- **REVIEW**: delegatecall, high-risk selectors, risk score 20-59
-
-## Files
-- `scripts/safeguard.py` — policy evaluator (skills + payments)
-- `scripts/contract_scanner.py` — bytecode analyzer (NEW)
-- `scripts/sample_policy.json` — example policy config
-- `scripts/sample_requests.json` — example requests
-
-## Architecture
-```
-Agent Request → SafeGuard
-                ├── Policy Gate (skills/payments)
-                │   └── allowlist/denylist/thresholds
-                └── Contract Scanner (NEW)
-                    ├── bytecode fetch (RPC)
-                    ├── opcode analysis
-                    ├── selector detection
-                    └── known-safe lookup
-```
-
-## Bonus (Opt-in): Bamboozle-Roll
-A **consentful social-engineering test vector** that helps agents practice refusing:
-- secret requests (PK/seed)
-- mainnet prompts
-- random shell commands
-- unlimited approvals
-
-Generate a shareable snippet:
+Or clone directly:
 ```bash
-python3 scripts/bamboozle_roll.py --format comment
-python3 scripts/bamboozle_roll.py --format post
+git clone https://github.com/afafw/usdc-hackathon-openclaw-skill ~/.openclaw/skills/safeguard
 ```
 
-Constraints:
-- Explicitly labeled link (no deception)
-- No auto-posting; only prints text for humans/agents to copy-paste
-- No vote requests
+## Integration with InstallToPay
 
-Optional testnet souvenir (event-only receipt contract, Base Sepolia):
-- https://sepolia.basescan.org/address/0x9A4C58eb135512e63BAafa7c87E5F79DEBc5711E
+SafeGuard is the verification layer in the [InstallToPay](https://usdc-hackathon-agentic-commerce.vercel.app) escrow flow:
 
-## What's Next
-- Hook into real OpenClaw skill install/enable flows
-- Add Etherscan-verified source code analysis
-- Combine policy gate + contract scanner into unified pipeline
-- Real-time monitoring: flag when approved contracts get upgraded
-- Risk scoring with ML-based anomaly detection
+1. Buyer locks USDC in escrow
+2. Seller delivers skill package
+3. **SafeGuard scans the skill** ← you are here
+4. If ALLOW → USDC releases
+5. If BLOCK → dispute + on-chain evidence
+
+## On-Chain Attestation
+
+Scan results can be attested on Base Sepolia via ReputationPassport:
+- Passport: [`0x8cF1FAE51Fffae83aB63f354a152256B62828E1E`](https://sepolia.basescan.org/address/0x8cF1FAE51Fffae83aB63f354a152256B62828E1E)
